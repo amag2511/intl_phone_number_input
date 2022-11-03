@@ -86,10 +86,17 @@ class InternationalPhoneNumberInput extends StatefulWidget {
 
   final List<String>? countries;
 
+  final bool? isCustomSelectorButton;
+  final SelectorTapCallback? onCustomSelectorButtonTap;
+  final SelectorButtonBuilder? customSelectorButtonBuilder;
+
   InternationalPhoneNumberInput(
       {Key? key,
       this.selectorConfig = const SelectorConfig(),
       required this.onInputChanged,
+      this.isCustomSelectorButton,
+      this.onCustomSelectorButtonTap,
+      this.customSelectorButtonBuilder,
       this.onInputValidated,
       this.onSubmit,
       this.onFieldSubmitted,
@@ -293,6 +300,9 @@ class _InputWidgetState extends State<InternationalPhoneNumberInput> {
     if (widget.selectorConfig.setSelectorButtonAsPrefixIcon) {
       return value.copyWith(
           prefixIcon: SelectorButton(
+        isCustom: widget.isCustomSelectorButton,
+        customBuilder: widget.customSelectorButtonBuilder,
+        onTap: widget.onCustomSelectorButtonTap,
         country: country,
         countries: countries,
         onCountryChanged: onCountryChanged,
@@ -400,6 +410,9 @@ class _InputWidgetView
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 SelectorButton(
+                  isCustom: widget.isCustomSelectorButton,
+                  customBuilder: widget.customSelectorButtonBuilder,
+                  onTap: widget.onCustomSelectorButtonTap,
                   country: state.country,
                   countries: state.countries,
                   onCountryChanged: state.onCountryChanged,

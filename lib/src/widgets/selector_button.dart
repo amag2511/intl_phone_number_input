@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/src/models/country_model.dart';
 import 'package:intl_phone_number_input/src/utils/selector_config.dart';
@@ -6,8 +8,17 @@ import 'package:intl_phone_number_input/src/widgets/countries_search_list_widget
 import 'package:intl_phone_number_input/src/widgets/input_widget.dart';
 import 'package:intl_phone_number_input/src/widgets/item.dart';
 
+typedef SelectorTapCallback = FutureOr<Country?> Function(
+    List<Country> countries);
+
+typedef SelectorButtonBuilder = Widget Function(Widget child);
+
 /// [SelectorButton]
 class SelectorButton extends StatelessWidget {
+  final bool? isCustom;
+  final SelectorTapCallback? onTap;
+  final SelectorButtonBuilder? customBuilder;
+
   final List<Country> countries;
   final Country? country;
   final SelectorConfig selectorConfig;
@@ -20,22 +31,45 @@ class SelectorButton extends StatelessWidget {
 
   final ValueChanged<Country?> onCountryChanged;
 
-  const SelectorButton({
-    Key? key,
-    required this.countries,
-    required this.country,
-    required this.selectorConfig,
-    required this.selectorTextStyle,
-    required this.searchBoxDecoration,
-    required this.autoFocusSearchField,
-    required this.locale,
-    required this.onCountryChanged,
-    required this.isEnabled,
-    required this.isScrollControlled,
-  }) : super(key: key);
+  const SelectorButton(
+      {Key? key,
+      required this.countries,
+      required this.country,
+      required this.selectorConfig,
+      required this.selectorTextStyle,
+      required this.searchBoxDecoration,
+      required this.autoFocusSearchField,
+      required this.locale,
+      required this.onCountryChanged,
+      required this.isEnabled,
+      required this.isScrollControlled,
+      this.isCustom,
+      this.onTap,
+      this.customBuilder})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    if (isCustom == true) {
+      assert(onTap != null && customBuilder != null);
+      return GestureDetector(
+        onTap: () async {
+          final country = await onTap!(countries);
+          onCountryChanged(country);
+        },
+        child: customBuilder!(
+          Item(
+            country: country,
+            showFlag: selectorConfig.showFlags,
+            useEmoji: selectorConfig.useEmoji,
+            leadingPadding: selectorConfig.leadingPadding,
+            trailingSpace: selectorConfig.trailingSpace,
+            textStyle: selectorTextStyle,
+          ),
+        ),
+      );
+    }
+
     return selectorConfig.selectorType == PhoneInputSelectorType.DROPDOWN
         ? countries.isNotEmpty && countries.length > 1
             ? DropdownButtonHideUnderline(
