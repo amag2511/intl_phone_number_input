@@ -144,7 +144,7 @@ class _InputWidgetState extends State<InternationalPhoneNumberInput> {
 
   Country? country;
   List<Country> countries = [];
-  bool isNotValid = true;
+  bool isNotValid = false;
 
   @override
   void initState() {
@@ -251,7 +251,7 @@ class _InputWidgetState extends State<InternationalPhoneNumberInput> {
           if (widget.onInputValidated != null) {
             widget.onInputValidated!(false);
           }
-          this.isNotValid = true;
+          this.isNotValid = parsedPhoneNumberString.isNotEmpty;
         } else {
           if (widget.onInputChanged != null) {
             widget.onInputChanged!(PhoneNumber(
@@ -399,38 +399,38 @@ class _InputWidgetView
   Widget build(BuildContext context) {
     final countryCode = state.country?.alpha2Code ?? '';
     final dialCode = state.country?.dialCode ?? '';
+    final textColor = widget.textStyle?.color;
+    final errorColor = widget.inputDecoration?.errorStyle?.color ?? textColor;
+    final style = widget.textStyle
+        ?.copyWith(color: state.isNotValid ? errorColor : textColor);
 
     return Container(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          if (!widget.selectorConfig.setSelectorButtonAsPrefixIcon) ...[
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                SelectorButton(
-                  isCustom: widget.isCustomSelectorButton,
-                  customBuilder: widget.customSelectorButtonBuilder,
-                  onTap: widget.onCustomSelectorButtonTap,
-                  country: state.country,
-                  countries: state.countries,
-                  onCountryChanged: state.onCountryChanged,
-                  selectorConfig: widget.selectorConfig,
-                  selectorTextStyle: widget.selectorTextStyle,
-                  searchBoxDecoration: widget.searchBoxDecoration,
-                  locale: state.locale,
-                  isEnabled: widget.isEnabled,
-                  autoFocusSearchField: widget.autoFocusSearch,
-                  isScrollControlled: widget.countrySelectorScrollControlled,
-                ),
-                SizedBox(
-                  height: state.selectorButtonBottomPadding,
-                ),
-              ],
+          if (!widget.selectorConfig.setSelectorButtonAsPrefixIcon)
+            Padding(
+              padding: EdgeInsets.only(
+                bottom: state.selectorButtonBottomPadding,
+                right: widget.spaceBetweenSelectorAndTextField,
+              ),
+              child: SelectorButton(
+                isCustom: widget.isCustomSelectorButton,
+                customBuilder: widget.customSelectorButtonBuilder,
+                onTap: widget.onCustomSelectorButtonTap,
+                country: state.country,
+                countries: state.countries,
+                onCountryChanged: state.onCountryChanged,
+                selectorConfig: widget.selectorConfig,
+                selectorTextStyle: widget.selectorTextStyle,
+                searchBoxDecoration: widget.searchBoxDecoration,
+                locale: state.locale,
+                isEnabled: widget.isEnabled,
+                autoFocusSearchField: widget.autoFocusSearch,
+                isScrollControlled: widget.countrySelectorScrollControlled,
+              ),
             ),
-            SizedBox(width: widget.spaceBetweenSelectorAndTextField),
-          ],
           Flexible(
             child: TextFormField(
               key: widget.fieldKey ?? Key(TestHelper.TextInputKeyValue),
@@ -442,7 +442,7 @@ class _InputWidgetView
               autofocus: widget.autoFocus,
               keyboardType: widget.keyboardType,
               textInputAction: widget.keyboardAction,
-              style: widget.textStyle,
+              style: style,
               decoration: state.getInputDecoration(widget.inputDecoration),
               textAlign: widget.textAlign,
               textAlignVertical: widget.textAlignVertical,
